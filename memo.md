@@ -114,3 +114,42 @@ return (
 
 2. isDark : App ->router->coin -> chart
    state를 쓰면 isdark 라는 state를 isDark -> App / isDark -> Chart
+
+3. Recoil에서 selector는 파생된 상태(derived state)를 나타내는 데 사용
+   상태 변환과 상태 결합, 비동기 쿼리, 성능 최적화 등에 사용된다
+
+4. props를 안쓰고 recoil로 데이터를 수정하고 관리할 수 있는게 장점
+
+5. 최근엔 잘안쓰는듯함
+
+# React - hook - form
+
+const {
+register,
+watch,
+handleSubmit,
+formState: { errors },
+setError,
+} = useForm<IForm>({
+defaultValues: {
+email: "@naver.com",
+},
+});
+
+1. register - 입력 필드를 React Hook Form에 등록
+2. handleSubmit - 폼 제출을 처리하는 핸들러로, 입력 값의 유효성을 검사한 후 지정된 콜백 함수를 실행
+3. formState - 폼의 상태 정보를 포함하는 객체로, 주로 폼의 유효성 검사 결과와 에러 메시지 등을 제공
+4. etError - 특정 필드에 대해 수동으로 오류를 설정할 때 사용. 예를 들어, 비즈니스 로직에 따라 특정 조건에서 에러를 발생
+
+# Drag and Drop
+
+onDragEnd이라는 훅을 이용해서 드래그의 시작과 끝을 알 수 있음
+그리고 splice를 이용하여 배열을 정리한다
+
+Dragabble은 드래그할때마다 엄청나게 많은 렌더링을 하기때문에 오류가 발생할 확률이 높아져서
+렌더링을 컨트롤하는 코드가 필요함.. 특히 배포하거나 빠르게 드래그 앤 드롭을 할때 에러가 발생할 확률이 높아짐
+
+## react memo - props가 바뀌지 않는다면 렌더링을 하지 않도록 함
+
+-> 리액트의 최적화 tool
+-> 그런데 기본적으로 렌더를 두번씩 하네... ;; 이건 내가 Droppable을 수정해서 써서 그런가

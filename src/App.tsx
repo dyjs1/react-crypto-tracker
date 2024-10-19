@@ -1,10 +1,8 @@
 import styled, { ThemeProvider, createGlobalStyle } from "styled-components";
-import Router from "./Router";
-import { ReactQueryDevtools } from "react-query/devtools";
-import { darkTheme, lightTheme } from "./theme";
-import { useRecoilValue } from "recoil";
-import { isDarkAtom } from "./atoms";
-
+import { DragDropContext, DropResult } from "react-beautiful-dnd";
+import { useRecoilState } from "recoil";
+import { toDoState } from "./atoms";
+import Board from "./Components/Board";
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400&display=swap');
 
@@ -78,16 +76,67 @@ const GlobalStyle = createGlobalStyle`
     color: inherit;
   }
 `;
+const Wrapper = styled.div`
+  display: flex;
+  max-width: 680px;
+  width: 100vw;
+  margin: 0 auto;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+`;
+const Boards = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  gap: 10px;
+`;
 
 function App() {
-  const isDark = useRecoilValue(isDarkAtom);
+  const [toDos, setToDos] = useRecoilState(toDoState);
+  const onDragEnd = ({ destination, source, draggableId }: DropResult) => {
+    if (!destination) return;
+    if (destination?.droppableId === source.droppableId) {
+      setToDos((allBoards) => {
+        const boardCopy = [...allBoards[source.droppableId]];
+        const taskObj = boardCopy[source.index];
+        boardCopy.splice(source.index, 1);
+        boardCopy.splice(destination.index, 0, taskObj);
+        return {
+          ...allBoards,
+          [source.droppableId]: boardCopy,
+        };
+      });
+    }
+    if (destination?.droppableId !== source.droppableId) {
+      // cross board movement
+      setToDos((allBoards) => {
+        const sourceBoard = [...allBoards[source.droppableId]];
+        const taskObj = sourceBoard[source.index];
+        const destinationBoard = [...allBoards[destination.droppableId]];
+        sourceBoard.splice(source.index, 1);
+        destinationBoard.splice(destination?.index, 0, taskObj);
+        return {
+          ...allBoards,
+          [source.droppableId]: sourceBoard,
+          [destination.droppableId]: destinationBoard,
+        };
+      });
+    }
+  };
   return (
     <>
-      <ThemeProvider theme={isDark ? darkTheme : lightTheme}>
-        <GlobalStyle />
-        <Router />
-        <ReactQueryDevtools initialIsOpen={true} />
-      </ThemeProvider>
+      <GlobalStyle />
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Wrapper>
+          <Boards>
+            {Object.keys(toDos).map((boardId) => (
+              <Board boardId={boardId} key={boardId} toDos={toDos[boardId]} />
+            ))}
+          </Boards>
+        </Wrapper>
+      </DragDropContext>
     </>
   );
 }
